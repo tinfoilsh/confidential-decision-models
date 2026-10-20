@@ -1,0 +1,20 @@
+Fix FlashInfer %globaltimer JIT compile in vllm-openai images so the CC-safe
+autotune timer actually engages (origin: glm-b300-cc-lab; verified on
+flashinfer 0.7.2 / vllm 0.32.1rc1 nightly / H200 CC).
+--- a/usr/local/lib/python3.12/dist-packages/flashinfer/utils.py
++++ b/usr/local/lib/python3.12/dist-packages/flashinfer/utils.py
+@@ -1642,12 +1642,12 @@
+ 
+     _GLOBALTIMER_KERNEL_CU = r"""
+     #include <torch/extension.h>
+-    #include <ATen/cuda/CUDAContext.h>
++    #include <c10/cuda/CUDAStream.h>
+     __global__ void _get_globaltimer_timestamp(uint64_t* timestamp) {
+         asm volatile("mov.u64 %0, %%globaltimer;" : "=l"(*timestamp));
+     }
+     void get_globaltimer_timestamp(torch::Tensor timestamp) {
+-        _get_globaltimer_timestamp<<<1, 1, 0, at::cuda::getCurrentCUDAStream()>>>(
++        _get_globaltimer_timestamp<<<1, 1, 0, c10::cuda::getCurrentCUDAStream()>>>(
+         reinterpret_cast<uint64_t*>(timestamp.data_ptr<int64_t>()));
+     }
+     """

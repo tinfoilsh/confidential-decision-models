@@ -1,0 +1,26 @@
+Disable pinned host memory under CC: in-flight H2D DMAs from pinned staging
+read buffers the pinned caching allocator has already recycled (allocator
+trusts cudaEvent completion, unreliable under CC — see deepseek-flash-cc-lab
+exp 182). Pageable copies are synchronous by construction. Verified: 0/5 clean
+boots without -> 9/9 clean boots with (conc8 x 20 rounds, stock flags), vllm
+0.32.1rc1 nightly / H200 CC. Apply from /: patch -p1 --fuzz=0.
+--- a/usr/local/lib/python3.12/dist-packages/vllm/platforms/interface.py
++++ b/usr/local/lib/python3.12/dist-packages/vllm/platforms/interface.py
+@@ -1180,6 +1180,7 @@
+     @classmethod
+     def is_pin_memory_available(cls) -> bool:
+         """Checks whether pin memory is available on the current platform."""
++        return False  # TF_CC_NOPIN
+         if in_wsl():
+             # https://docs.nvidia.com/cuda/wsl-user-guide/index.html#known-limitations-for-linux-cuda-applications
+             # Pinned memory support under WSL depends on the vendor and driver
+--- a/usr/local/lib/python3.12/dist-packages/vllm/platforms/cuda.py
++++ b/usr/local/lib/python3.12/dist-packages/vllm/platforms/cuda.py
+@@ -302,6 +302,7 @@
+ 
+     @classmethod
+     def is_pin_memory_available(cls) -> bool:
++        return False  # TF_CC_NOPIN
+         if in_wsl():
+             # WSL1 has no CUDA support, so being on the CUDA platform under
+             # WSL implies WSL2. Gate on kernel >= 4.19.121, the first WSL2
