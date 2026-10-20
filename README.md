@@ -6,9 +6,9 @@ not generated text):
 
 | model | params | p50 (solo, ~2k-tok state) | saturated throughput¹ |
 |---|---|---|---|
-| `d3` | 27B | 143ms | ~8 dec/s |
-| `d3-flash` | 9B | 54ms | ~27 dec/s |
-| `d3-mini` | 4B | 48ms | ~46 dec/s |
+| `decision-27b` | 27B | 143ms | ~8 dec/s |
+| `decision-9b` | 9B | 54ms | ~27 dec/s |
+| `decision-4b` | 4B | 48ms | ~46 dec/s |
 
 ¹ co-resident on one H200, 2k-token states; prefill-bound, so throughput
 scales ~1/input-tokens.
@@ -20,7 +20,7 @@ Clients use **one hostname** and select a model the OpenAI way — by the
 
 ```
 POST /v1/systemone
-{"model": "d3-mini", "state": "...", "questions": {...}}
+{"model": "decision-4b", "state": "...", "questions": {...}}
 ```
 
 The in-enclave router (`router/`) dispatches on that field to the right vLLM
@@ -63,7 +63,7 @@ digest in `vllm/Dockerfile`.
 
 ## Scheduling
 
-`--max-num-seqs` 8 / 30 / 50 (d3 / flash / mini) bounds in-flight latency to
+`--max-num-seqs` 8 / 30 / 50 (27b / 9b / 4b) bounds in-flight latency to
 ~1s worst case at 2k-token states, at zero measured throughput cost. Overflow
 queues in vLLM; the model router's overload shedding handles sustained
 excess. `--scheduling-policy priority` enables the rate-limiter's demote
@@ -77,7 +77,7 @@ lane. Prefix caching is off (matches the qualified configuration).
 - [ ] Shape check: 3 model packs + 3 base disks = 6-disk VM shape
       {16 cpu, 128 GB, 1 gpu} — endorse in cvmimage `platform/` if no
       measurement exists yet (adding a model pack changes the disk count).
-- [ ] controlplane router YAML: map `d3`, `d3-flash`, `d3-mini` to this
+- [ ] controlplane router YAML: map `decision-27b`, `decision-9b`, `decision-4b` to this
       enclave; add `tier_model_rate_limits` rows (decisions report prompt
       tokens, so real TPM limits work — unlike request-metered audio).
 - [ ] Router-repo trust anchor PR for the new enclave repo.

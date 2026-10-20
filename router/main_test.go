@@ -42,7 +42,7 @@ func newTestBackend(t *testing.T, name string, lastBody *string) (*backend, *htt
 func newTestHandler(t *testing.T, lastBody *string) http.Handler {
 	t.Helper()
 	backends := map[string]*backend{}
-	for _, name := range []string{"d3", "d3-flash", "d3-mini"} {
+	for _, name := range []string{"decision-27b", "decision-9b", "decision-4b"} {
 		b, _ := newTestBackend(t, name, lastBody)
 		backends[name] = b
 	}
@@ -53,7 +53,7 @@ func TestRoutesOnBodyModel(t *testing.T) {
 	var lastBody string
 	h := newTestHandler(t, &lastBody)
 
-	for _, model := range []string{"d3", "d3-flash", "d3-mini"} {
+	for _, model := range []string{"decision-27b", "decision-9b", "decision-4b"} {
 		body := `{"model":"` + model + `","state":"s","questions":{"q":{"type":"noul","instructions":"x?"}}}`
 		req := httptest.NewRequest(http.MethodPost, "/v1/systemone", strings.NewReader(body))
 		rec := httptest.NewRecorder()
@@ -79,7 +79,7 @@ func TestUnknownModel(t *testing.T) {
 	if rec.Code != http.StatusNotFound {
 		t.Fatalf("status = %d, want 404", rec.Code)
 	}
-	if !strings.Contains(rec.Body.String(), "d3-mini") {
+	if !strings.Contains(rec.Body.String(), "decision-4b") {
 		t.Fatalf("error should list available models: %q", rec.Body.String())
 	}
 }
@@ -125,7 +125,7 @@ func TestMergedMetricsStripsComments(t *testing.T) {
 	if strings.Contains(body, "#") {
 		t.Fatalf("comments not stripped: %q", body)
 	}
-	for _, name := range []string{"d3", "d3-flash", "d3-mini"} {
+	for _, name := range []string{"decision-27b", "decision-9b", "decision-4b"} {
 		if !strings.Contains(body, `model_name="`+name+`"`) {
 			t.Fatalf("missing series for %s: %q", name, body)
 		}
