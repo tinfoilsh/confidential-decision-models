@@ -37,7 +37,7 @@ containers:
       start_period: 1m
 
   # GPU budgets, kv-cache carve-outs, and max-num-seqs caps come from the
-  # h200-lab qualification (tf-test research/decision-models/h200-lab):
+  # H200 qualification lab:
   # co-resident on one H200, prefill-bound; caps bound in-flight latency
   # (~1s worst case at 2k-token states) at zero throughput cost.
   # Start the largest model first is NOT required with explicit

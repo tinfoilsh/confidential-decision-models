@@ -11,8 +11,7 @@ not generated text):
 | `d3-mini` | 4B | 48ms | ~46 dec/s |
 
 ¹ co-resident on one H200, 2k-token states; prefill-bound, so throughput
-scales ~1/input-tokens. Full qualification: tf-test
-`research/decision-models/h200-lab/`.
+scales ~1/input-tokens.
 
 ## Routing
 
@@ -48,8 +47,7 @@ The router also serves:
 
 The d3 family needs a vLLM nightly (≥0.32.1rc1) for the structured-decisions
 API, and that stack is broken under NVIDIA CC without two patches
-(`vllm/patches/`, full investigation + evidence in tf-test
-`research/decision-models/h200-lab/`):
+(`vllm/patches/`):
 
 1. **FlashInfer globaltimer include fix** — the CC-safe autotune timer fails
    to JIT in stock images and silently falls back to cudaEvent timing, which
