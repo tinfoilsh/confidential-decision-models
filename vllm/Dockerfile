@@ -2,7 +2,7 @@
 # Confidential Computing.
 #
 # Base: vllm-openai nightly (v0.32.1rc1.dev117+gdf3bd094a) — the d3 family
-# needs the /v1/systemone structured-decisions API, which is not in any
+# needs the Decisions API (/v1/decisions), which is not in any
 # stable release yet. Pin by digest; bump to v0.32.1 stable when it lands.
 #
 # Patches (from the H200 CC qualification lab):

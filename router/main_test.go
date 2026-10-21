@@ -55,7 +55,7 @@ func TestRoutesOnBodyModel(t *testing.T) {
 
 	for _, model := range []string{"decision-27b", "decision-9b", "decision-4b"} {
 		body := `{"model":"` + model + `","state":"s","questions":{"q":{"type":"noul","instructions":"x?"}}}`
-		req := httptest.NewRequest(http.MethodPost, "/v1/systemone", strings.NewReader(body))
+		req := httptest.NewRequest(http.MethodPost, "/v1/decisions", strings.NewReader(body))
 		rec := httptest.NewRecorder()
 		h.ServeHTTP(rec, req)
 
@@ -73,7 +73,7 @@ func TestRoutesOnBodyModel(t *testing.T) {
 
 func TestUnknownModel(t *testing.T) {
 	h := newTestHandler(t, nil)
-	req := httptest.NewRequest(http.MethodPost, "/v1/systemone", strings.NewReader(`{"model":"gpt-4"}`))
+	req := httptest.NewRequest(http.MethodPost, "/v1/decisions", strings.NewReader(`{"model":"gpt-4"}`))
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, req)
 	if rec.Code != http.StatusNotFound {
@@ -86,7 +86,7 @@ func TestUnknownModel(t *testing.T) {
 
 func TestNonJSONBody(t *testing.T) {
 	h := newTestHandler(t, nil)
-	req := httptest.NewRequest(http.MethodPost, "/v1/systemone", strings.NewReader("not json"))
+	req := httptest.NewRequest(http.MethodPost, "/v1/decisions", strings.NewReader("not json"))
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, req)
 	if rec.Code != http.StatusBadRequest {

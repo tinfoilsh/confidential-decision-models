@@ -2,13 +2,13 @@
 //
 // Three vllm-sr structured-decision models (d3 family) share this enclave:
 // decision-27b, decision-9b, and decision-4b. Every decision request is a JSON POST to
-// /v1/systemone whose body carries a "model" field, so — unlike the audio
+// /v1/decisions whose body carries a "model" field, so — unlike the audio
 // enclave, where bodies aren't uniformly parseable and routing must use
 // subdomains — this router dispatches on the model named in the body.
 // Clients use one hostname and pick a model exactly like any OpenAI-style
 // API: by model name.
 //
-//	POST /v1/systemone {"model":"decision-4b",...} -> decision-4b container
+//	POST /v1/decisions {"model":"decision-4b",...} -> decision-4b container
 //	GET  /v1/models                            -> merged list from all backends
 //	GET  /metrics                              -> concatenated backend metrics
 //	GET  /health                               -> router's own health
@@ -30,7 +30,7 @@ import (
 	"time"
 )
 
-// maxBodyBytes caps /v1/systemone request bodies. Decision states are text;
+// maxBodyBytes caps /v1/decisions request bodies. Decision states are text;
 // 32 MiB is far beyond any realistic request while still bounding memory.
 const maxBodyBytes = 32 << 20
 
@@ -81,7 +81,7 @@ func newHandler(backends map[string]*backend) http.Handler {
 		_, _ = w.Write([]byte("ok"))
 	})
 
-	mux.HandleFunc("/v1/systemone", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/v1/decisions", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 			return

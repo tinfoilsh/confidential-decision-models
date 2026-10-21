@@ -1,7 +1,7 @@
 # confidential-decision-models
 
 One enclave serving the three vllm-sr **structured-decision models** (typed
-decisions via vLLM's `/v1/systemone` API — probabilities over labeled answers,
+decisions via the OpenAI Decisions API (`/v1/decisions`) — probabilities over labeled answers,
 not generated text):
 
 | model | params | p50 (solo, ~2k-tok state) | saturated throughput¹ |
@@ -19,8 +19,8 @@ Clients use **one hostname** and select a model the OpenAI way — by the
 `model` field in the request body:
 
 ```
-POST /v1/systemone
-{"model": "decision-4b", "state": "...", "questions": {...}}
+POST /v1/decisions
+{"model": "decision-4b", "input": "...", "questions": [...]}
 ```
 
 The in-enclave router (`router/`) dispatches on that field to the right vLLM
@@ -45,8 +45,9 @@ The router also serves:
 
 ## Confidential-computing patches
 
-The d3 family needs a vLLM nightly (≥0.32.1rc1) for the structured-decisions
-API, and that stack is broken under NVIDIA CC without two patches
+The d3 family needs a vLLM nightly (≥0.32.1rc1) for the Decisions API
+(vLLM also serves the TypeSafe-dialect /v1/systemone internally; only
+/v1/decisions is exposed through the shim), and that stack is broken under NVIDIA CC without two patches
 (`vllm/patches/`):
 
 1. **FlashInfer globaltimer include fix** — the CC-safe autotune timer fails

@@ -157,10 +157,10 @@ shim:
   upstream-port: 8080
   authenticated: true
   authenticated-endpoints:
-    - /v1/systemone
+    - /v1/decisions
     - /metrics
   paths:
     - /health
     - /metrics
-    - /v1/systemone
+    - /v1/decisions
     - /v1/models
