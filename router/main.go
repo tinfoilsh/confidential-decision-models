@@ -1,12 +1,8 @@
 // Package main implements the Tinfoil decision-models reverse proxy.
 //
-// Three vllm-sr structured-decision models (d3 family) share this enclave:
-// decision-27b, decision-9b, and decision-4b. Every decision request is a JSON POST to
-// /v1/decisions whose body carries a "model" field, so — unlike the audio
-// enclave, where bodies aren't uniformly parseable and routing must use
-// subdomains — this router dispatches on the model named in the body.
-// Clients use one hostname and pick a model exactly like any OpenAI-style
-// API: by model name.
+// Three structured-decision models (the vllm-sr d3 family) share this
+// enclave: decision-27b, decision-9b, and decision-4b. The router dispatches
+// each request on the "model" field of its JSON body.
 //
 //	POST /v1/decisions {"model":"decision-4b",...} -> decision-4b container
 //	GET  /v1/models                            -> merged list from all backends
