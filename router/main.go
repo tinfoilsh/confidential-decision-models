@@ -1,14 +1,10 @@
 // Package main implements the Tinfoil decision-models reverse proxy.
 //
-// Three vllm-sr structured-decision models share this enclave: d3 (27B),
-// d3-flash (9B), and d3-mini (4B). Every decision request is a JSON POST to
-// /v1/systemone whose body carries a "model" field, so — unlike the audio
-// enclave, where bodies aren't uniformly parseable and routing must use
-// subdomains — this router dispatches on the model named in the body.
-// Clients use one hostname and pick a model exactly like any OpenAI-style
-// API: by model name.
+// Three structured-decision models (the vllm-sr d3 family) share this
+// enclave: decision-27b, decision-9b, and decision-4b. The router dispatches
+// each request on the "model" field of its JSON body.
 //
-//	POST /v1/systemone {"model":"d3-mini",...} -> d3-mini container
+//	POST /v1/decisions {"model":"decision-4b",...} -> decision-4b container
 //	GET  /v1/models                            -> merged list from all backends
 //	GET  /metrics                              -> concatenated backend metrics
 //	GET  /health                               -> router's own health
@@ -30,9 +26,11 @@ import (
 	"time"
 )
 
-// maxBodyBytes caps /v1/systemone request bodies. Decision states are text;
-// 32 MiB is far beyond any realistic request while still bounding memory.
-const maxBodyBytes = 32 << 20
+// maxBodyBytes caps /v1/decisions request bodies, and thereby the router's
+// per-request memory (the body is buffered to read its "model" field). The
+// engines serve 32k-token contexts (~130 KB of text), so 4 MiB is ~30x the
+// largest legitimate request. Revisit if image inputs are ever enabled.
+const maxBodyBytes = 4 << 20
 
 type backend struct {
 	name     string
@@ -43,9 +41,9 @@ type backend struct {
 func main() {
 	listenAddr := getenvDefault("LISTEN_ADDR", ":8080")
 	specs := map[string]string{
-		"d3":       getenvDefault("D3_URL", "http://127.0.0.1:8103"),
-		"d3-flash": getenvDefault("D3_FLASH_URL", "http://127.0.0.1:8102"),
-		"d3-mini":  getenvDefault("D3_MINI_URL", "http://127.0.0.1:8101"),
+		"decision-27b": getenvDefault("DECISION_27B_URL", "http://127.0.0.1:8103"),
+		"decision-9b":  getenvDefault("DECISION_9B_URL", "http://127.0.0.1:8102"),
+		"decision-4b":  getenvDefault("DECISION_4B_URL", "http://127.0.0.1:8101"),
 	}
 
 	backends, err := buildBackends(specs)
@@ -81,7 +79,7 @@ func newHandler(backends map[string]*backend) http.Handler {
 		_, _ = w.Write([]byte("ok"))
 	})
 
-	mux.HandleFunc("/v1/systemone", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/v1/decisions", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 			return

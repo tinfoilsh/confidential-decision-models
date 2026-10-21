@@ -10,13 +10,13 @@ networks:
 # (fill like confidential-small-models; the mpk-<sha256> path segments in the
 # container commands must match the first field of each mpk).
 models:
-  - name: "d3"
+  - name: "decision-27b"
     repo: "vllm-sr/d3@cf15549a78fc52598ddd1951f321c58372bbd64f"
     mpk: "0000000000000000000000000000000000000000000000000000000000000000_0_00000000-0000-0000-0000-000000000000"
-  - name: "d3-flash"
+  - name: "decision-9b"
     repo: "vllm-sr/d3-flash@13dc1cc8ef23caefa765907e1d764751e5629f7d"
     mpk: "1111111111111111111111111111111111111111111111111111111111111111_0_00000000-0000-0000-0000-000000000000"
-  - name: "d3-mini"
+  - name: "decision-4b"
     repo: "vllm-sr/d3-mini@bd0090dd758d32ba59ef5c749910a8e87fc4391f"
     mpk: "2222222222222222222222222222222222222222222222222222222222222222_0_00000000-0000-0000-0000-000000000000"
 
@@ -26,9 +26,9 @@ containers:
     restart: always
     env:
       - LISTEN_ADDR: ":8080"
-      - D3_URL: "http://d3:8103"
-      - D3_FLASH_URL: "http://d3-flash:8102"
-      - D3_MINI_URL: "http://d3-mini:8101"
+      - DECISION_27B_URL: "http://decision-27b:8103"
+      - DECISION_9B_URL: "http://decision-9b:8102"
+      - DECISION_4B_URL: "http://decision-4b:8101"
     networks: ["models"]
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
@@ -37,12 +37,12 @@ containers:
       start_period: 1m
 
   # GPU budgets, kv-cache carve-outs, and max-num-seqs caps come from the
-  # h200-lab qualification (tf-test research/decision-models/h200-lab):
+  # H200 qualification lab:
   # co-resident on one H200, prefill-bound; caps bound in-flight latency
   # (~1s worst case at 2k-token states) at zero throughput cost.
   # Start the largest model first is NOT required with explicit
   # kv-cache-memory + gpu-memory-utilization set together on every engine.
-  - name: "d3"
+  - name: "decision-27b"
     image: "ghcr.io/tinfoilsh/confidential-decision-models-vllm@sha256:0000000000000000000000000000000000000000000000000000000000000000"
     runtime: nvidia
     gpus: all
@@ -52,7 +52,7 @@ containers:
       [
         "/tinfoil/mpk/mpk-0000000000000000000000000000000000000000000000000000000000000000",
         "--served-model-name",
-        "d3",
+        "decision-27b",
         "--gpu-memory-utilization",
         "0.55",
         "--kv-cache-memory",
@@ -79,7 +79,7 @@ containers:
       timeout: 5s
       start_period: 15m
 
-  - name: "d3-flash"
+  - name: "decision-9b"
     image: "ghcr.io/tinfoilsh/confidential-decision-models-vllm@sha256:0000000000000000000000000000000000000000000000000000000000000000"
     runtime: nvidia
     gpus: all
@@ -89,7 +89,7 @@ containers:
       [
         "/tinfoil/mpk/mpk-1111111111111111111111111111111111111111111111111111111111111111",
         "--served-model-name",
-        "d3-flash",
+        "decision-9b",
         "--gpu-memory-utilization",
         "0.20",
         "--kv-cache-memory",
@@ -116,7 +116,7 @@ containers:
       timeout: 5s
       start_period: 10m
 
-  - name: "d3-mini"
+  - name: "decision-4b"
     image: "ghcr.io/tinfoilsh/confidential-decision-models-vllm@sha256:0000000000000000000000000000000000000000000000000000000000000000"
     runtime: nvidia
     gpus: all
@@ -126,7 +126,7 @@ containers:
       [
         "/tinfoil/mpk/mpk-2222222222222222222222222222222222222222222222222222222222222222",
         "--served-model-name",
-        "d3-mini",
+        "decision-4b",
         "--gpu-memory-utilization",
         "0.10",
         "--kv-cache-memory",
@@ -157,10 +157,10 @@ shim:
   upstream-port: 8080
   authenticated: true
   authenticated-endpoints:
-    - /v1/systemone
+    - /v1/decisions
     - /metrics
   paths:
     - /health
     - /metrics
-    - /v1/systemone
+    - /v1/decisions
     - /v1/models
