@@ -26,9 +26,11 @@ import (
 	"time"
 )
 
-// maxBodyBytes caps /v1/decisions request bodies. Decision states are text;
-// 32 MiB is far beyond any realistic request while still bounding memory.
-const maxBodyBytes = 32 << 20
+// maxBodyBytes caps /v1/decisions request bodies, and thereby the router's
+// per-request memory (the body is buffered to read its "model" field). The
+// engines serve 32k-token contexts (~130 KB of text), so 4 MiB is ~30x the
+// largest legitimate request. Revisit if image inputs are ever enabled.
+const maxBodyBytes = 4 << 20
 
 type backend struct {
 	name     string
