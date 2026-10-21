@@ -6,9 +6,9 @@ not generated text):
 
 | model          | params | p50 (solo, ~2k-tok state) | saturated throughput¹ |
 | -------------- | ------ | ------------------------- | --------------------- |
-| `decision-27b` | 27B    | 143ms                     | ~8 dec/s              |
-| `decision-9b`  | 9B     | 54ms                      | ~27 dec/s             |
-| `decision-4b`  | 4B     | 48ms                      | ~46 dec/s             |
+| `decision-large` | 27B    | 143ms                     | ~8 dec/s              |
+| `decision-medium`  | 9B     | 54ms                      | ~27 dec/s             |
+| `decision-small`  | 4B     | 48ms                      | ~46 dec/s             |
 
 ¹ co-resident on one H200, 2k-token states; prefill-bound, so throughput
 scales ~1/input-tokens.
@@ -20,7 +20,7 @@ Clients use **one hostname** and select a model the OpenAI way — by the
 
 ```
 POST /v1/decisions
-{"model": "decision-4b", "input": "...", "questions": [...]}
+{"model": "decision-small", "input": "...", "questions": [...]}
 ```
 
 The in-enclave router (`router/`) dispatches on that field to the right vLLM

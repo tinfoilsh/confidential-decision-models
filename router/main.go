@@ -1,10 +1,10 @@
 // Package main implements the Tinfoil decision-models reverse proxy.
 //
 // Three structured-decision models (the vllm-sr d3 family) share this
-// enclave: decision-27b, decision-9b, and decision-4b. The router dispatches
+// enclave: decision-large, decision-medium, and decision-small. The router dispatches
 // each request on the "model" field of its JSON body.
 //
-//	POST /v1/decisions {"model":"decision-4b",...} -> decision-4b container
+//	POST /v1/decisions {"model":"decision-small",...} -> decision-small container
 //	GET  /v1/models                            -> merged list from all backends
 //	GET  /metrics                              -> concatenated backend metrics
 //	GET  /health                               -> router's own health
@@ -41,9 +41,9 @@ type backend struct {
 func main() {
 	listenAddr := getenvDefault("LISTEN_ADDR", ":8080")
 	specs := map[string]string{
-		"decision-27b": getenvDefault("DECISION_27B_URL", "http://127.0.0.1:8103"),
-		"decision-9b":  getenvDefault("DECISION_9B_URL", "http://127.0.0.1:8102"),
-		"decision-4b":  getenvDefault("DECISION_4B_URL", "http://127.0.0.1:8101"),
+		"decision-large": getenvDefault("DECISION_LARGE_URL", "http://127.0.0.1:8103"),
+		"decision-medium":  getenvDefault("DECISION_MEDIUM_URL", "http://127.0.0.1:8102"),
+		"decision-small":  getenvDefault("DECISION_SMALL_URL", "http://127.0.0.1:8101"),
 	}
 
 	backends, err := buildBackends(specs)
