@@ -1,0 +1,16 @@
+Register the OpenAI /v1/decisions handler for classify-task read strategies.
+The d3 family resolves to D3Strategy (task "classify"); upstream only wires
+the OpenAI dialect for task "generate", returning 501 for d3 even though
+OpenAIServingDecisions drives the same strategy.read() interface systemone
+uses. Minimal gate widening; drop when upstream lands classify support.
+--- a/usr/local/lib/python3.12/dist-packages/vllm/entrypoints/openai/decisions/state.py
++++ b/usr/local/lib/python3.12/dist-packages/vllm/entrypoints/openai/decisions/state.py
+@@ -37,7 +37,7 @@
+     except ValueError:
+         return None
+ 
+-    if strategy.task == "generate":
++    if strategy.task in ("generate", "classify"):
+         state.openai_serving_decisions = OpenAIServingDecisions(
+             state.openai_serving_models,
+             strategy,
