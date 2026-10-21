@@ -6,19 +6,16 @@ gpus: 1
 networks:
   models: {}
 
-# NOTE: mpk values are placeholders until the model packs are built
-# (fill like confidential-small-models; the mpk-<sha256> path segments in the
-# container commands must match the first field of each mpk).
 models:
   - name: "decision-27b"
     repo: "vllm-sr/d3@cf15549a78fc52598ddd1951f321c58372bbd64f"
-    mpk: "0000000000000000000000000000000000000000000000000000000000000000_0_00000000-0000-0000-0000-000000000000"
+    mpk: "c708c2a18c35a4034832cb64b387356685c9cffc4677dd5f82909c3a39e6bb78_52202151936_3993e9bf-ce7b-58e9-9538-779035c3c0ee"
   - name: "decision-9b"
     repo: "vllm-sr/d3-flash@13dc1cc8ef23caefa765907e1d764751e5629f7d"
-    mpk: "1111111111111111111111111111111111111111111111111111111111111111_0_00000000-0000-0000-0000-000000000000"
+    mpk: "86e829b3945f3d5da9dfde2eb1496b4169a5d0b13fde5ca00a30059937a8e9bd_16815730688_f3569a03-7b82-5990-a32b-424eef71ee1f"
   - name: "decision-4b"
     repo: "vllm-sr/d3-mini@bd0090dd758d32ba59ef5c749910a8e87fc4391f"
-    mpk: "2222222222222222222222222222222222222222222222222222222222222222_0_00000000-0000-0000-0000-000000000000"
+    mpk: "568e1da29fff2c8c81a28317939e402f9cbf79f72a8bb5cd0e91c96fd3fc2669_9107267584_34cba5b0-3dad-5d46-9564-ac24a591a683"
 
 containers:
   - name: "router"
@@ -50,7 +47,7 @@ containers:
     entrypoint: ["vllm", "serve"]
     command:
       [
-        "/tinfoil/mpk/mpk-0000000000000000000000000000000000000000000000000000000000000000",
+        "/tinfoil/mpk/mpk-c708c2a18c35a4034832cb64b387356685c9cffc4677dd5f82909c3a39e6bb78",
         "--served-model-name",
         "decision-27b",
         "--gpu-memory-utilization",
@@ -87,7 +84,7 @@ containers:
     entrypoint: ["vllm", "serve"]
     command:
       [
-        "/tinfoil/mpk/mpk-1111111111111111111111111111111111111111111111111111111111111111",
+        "/tinfoil/mpk/mpk-86e829b3945f3d5da9dfde2eb1496b4169a5d0b13fde5ca00a30059937a8e9bd",
         "--served-model-name",
         "decision-9b",
         "--gpu-memory-utilization",
@@ -124,7 +121,7 @@ containers:
     entrypoint: ["vllm", "serve"]
     command:
       [
-        "/tinfoil/mpk/mpk-2222222222222222222222222222222222222222222222222222222222222222",
+        "/tinfoil/mpk/mpk-568e1da29fff2c8c81a28317939e402f9cbf79f72a8bb5cd0e91c96fd3fc2669",
         "--served-model-name",
         "decision-4b",
         "--gpu-memory-utilization",
