@@ -19,7 +19,7 @@ models:
 
 containers:
   - name: "router"
-    image: "ghcr.io/tinfoilsh/confidential-decision-models@sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    image: "ghcr.io/tinfoilsh/confidential-decision-models@sha256:666f976f0adb5c042e2232867a056042f9e526bea0f545ef5df7bde51e6bbc4c" # v0.0.2
     restart: always
     env:
       - LISTEN_ADDR: ":8080"
@@ -40,7 +40,7 @@ containers:
   # Start the largest model first is NOT required with explicit
   # kv-cache-memory + gpu-memory-utilization set together on every engine.
   - name: "decision-27b"
-    image: "ghcr.io/tinfoilsh/confidential-decision-models-vllm@sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    image: "ghcr.io/tinfoilsh/confidential-decision-models-vllm@sha256:389fdd68e365a8feb77c32600243e462c0f7333b667913166ff05c5aa1d11a9e" # v0.0.2
     runtime: nvidia
     gpus: all
     restart: always
@@ -77,7 +77,7 @@ containers:
       start_period: 15m
 
   - name: "decision-9b"
-    image: "ghcr.io/tinfoilsh/confidential-decision-models-vllm@sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    image: "ghcr.io/tinfoilsh/confidential-decision-models-vllm@sha256:389fdd68e365a8feb77c32600243e462c0f7333b667913166ff05c5aa1d11a9e" # v0.0.2
     runtime: nvidia
     gpus: all
     restart: always
@@ -114,7 +114,7 @@ containers:
       start_period: 10m
 
   - name: "decision-4b"
-    image: "ghcr.io/tinfoilsh/confidential-decision-models-vllm@sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    image: "ghcr.io/tinfoilsh/confidential-decision-models-vllm@sha256:389fdd68e365a8feb77c32600243e462c0f7333b667913166ff05c5aa1d11a9e" # v0.0.2
     runtime: nvidia
     gpus: all
     restart: always
