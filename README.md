@@ -4,11 +4,11 @@ One enclave serving the three vllm-sr **structured-decision models** (typed
 decisions via the OpenAI Decisions API (`/v1/decisions`) — probabilities over labeled answers,
 not generated text):
 
-| model | params | p50 (solo, ~2k-tok state) | saturated throughput¹ |
-|---|---|---|---|
-| `decision-27b` | 27B | 143ms | ~8 dec/s |
-| `decision-9b` | 9B | 54ms | ~27 dec/s |
-| `decision-4b` | 4B | 48ms | ~46 dec/s |
+| model          | params | p50 (solo, ~2k-tok state) | saturated throughput¹ |
+| -------------- | ------ | ------------------------- | --------------------- |
+| `decision-27b` | 27B    | 143ms                     | ~8 dec/s              |
+| `decision-9b`  | 9B     | 54ms                      | ~27 dec/s             |
+| `decision-4b`  | 4B     | 48ms                      | ~46 dec/s             |
 
 ¹ co-resident on one H200, 2k-token states; prefill-bound, so throughput
 scales ~1/input-tokens.
@@ -30,13 +30,14 @@ realtime websockets); decision requests are always small JSON, so body
 routing is simpler and needs no wildcard certificate.
 
 Why three model names instead of one name plus a size parameter: the OpenAI
-API has no size/variant parameter — the model name *is* the selector — and
+API has no size/variant parameter — the model name _is_ the selector — and
 Tinfoil's per-model machinery (rate-limit tiers, metrics `model_name` labels,
 billing attribution) all key on model names. In the controlplane router YAML,
 all three names map to this one enclave, exactly like the small-models
 enclave.
 
 The router also serves:
+
 - `GET /v1/models` — merged model list from all three backends
 - `GET /metrics` — concatenated vLLM Prometheus metrics (series distinguished
   by `model_name`; note decisions generate no tokens, so generation-token
@@ -46,8 +47,7 @@ The router also serves:
 ## Confidential-computing patches
 
 The d3 family needs a vLLM nightly (≥0.32.1rc1) for the Decisions API
-(vLLM also serves the TypeSafe-dialect /v1/systemone internally; only
-/v1/decisions is exposed through the shim), and that stack is broken under NVIDIA CC without two patches
+and that stack is broken under NVIDIA CC without two patches
 (`vllm/patches/`):
 
 1. **FlashInfer globaltimer include fix** — the CC-safe autotune timer fails
@@ -69,16 +69,3 @@ digest in `vllm/Dockerfile`.
 queues in vLLM; the model router's overload shedding handles sustained
 excess. `--scheduling-policy priority` enables the rate-limiter's demote
 lane. Prefix caching is off (matches the qualified configuration).
-
-## Deployment checklist
-
-- [ ] Build model packs; replace the placeholder `mpk:` values and the
-      matching `/tinfoil/mpk/mpk-<sha256>` path segments in the commands.
-- [ ] Release images (`Tinfoil Release` workflow) and pin their digests.
-- [ ] Shape check: 3 model packs + 3 base disks = 6-disk VM shape
-      {16 cpu, 128 GB, 1 gpu} — endorse in cvmimage `platform/` if no
-      measurement exists yet (adding a model pack changes the disk count).
-- [ ] controlplane router YAML: map `decision-27b`, `decision-9b`, `decision-4b` to this
-      enclave; add `tier_model_rate_limits` rows (decisions report prompt
-      tokens, so real TPM limits work — unlike request-metered audio).
-- [ ] Router-repo trust anchor PR for the new enclave repo.
