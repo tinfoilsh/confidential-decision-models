@@ -7,13 +7,13 @@ networks:
   models: {}
 
 models:
-  - name: "decision-27b"
+  - name: "decision-large"
     repo: "vllm-sr/d3@cf15549a78fc52598ddd1951f321c58372bbd64f"
     mpk: "c708c2a18c35a4034832cb64b387356685c9cffc4677dd5f82909c3a39e6bb78_52202151936_3993e9bf-ce7b-58e9-9538-779035c3c0ee"
-  - name: "decision-9b"
+  - name: "decision-medium"
     repo: "vllm-sr/d3-flash@13dc1cc8ef23caefa765907e1d764751e5629f7d"
     mpk: "86e829b3945f3d5da9dfde2eb1496b4169a5d0b13fde5ca00a30059937a8e9bd_16815730688_f3569a03-7b82-5990-a32b-424eef71ee1f"
-  - name: "decision-4b"
+  - name: "decision-small"
     repo: "vllm-sr/d3-mini@bd0090dd758d32ba59ef5c749910a8e87fc4391f"
     mpk: "568e1da29fff2c8c81a28317939e402f9cbf79f72a8bb5cd0e91c96fd3fc2669_9107267584_34cba5b0-3dad-5d46-9564-ac24a591a683"
 
@@ -23,9 +23,9 @@ containers:
     restart: always
     env:
       - LISTEN_ADDR: ":8080"
-      - DECISION_27B_URL: "http://decision-27b:8103"
-      - DECISION_9B_URL: "http://decision-9b:8102"
-      - DECISION_4B_URL: "http://decision-4b:8101"
+      - DECISION_LARGE_URL: "http://decision-large:8103"
+      - DECISION_MEDIUM_URL: "http://decision-medium:8102"
+      - DECISION_SMALL_URL: "http://decision-small:8101"
     networks: ["models"]
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
@@ -39,7 +39,7 @@ containers:
   # (~1s worst case at 2k-token states) at zero throughput cost.
   # Start the largest model first is NOT required with explicit
   # kv-cache-memory + gpu-memory-utilization set together on every engine.
-  - name: "decision-27b"
+  - name: "decision-large"
     image: "ghcr.io/tinfoilsh/confidential-decision-models-vllm@sha256:0000000000000000000000000000000000000000000000000000000000000000"
     runtime: nvidia
     gpus: all
@@ -49,7 +49,7 @@ containers:
       [
         "/tinfoil/mpk/mpk-c708c2a18c35a4034832cb64b387356685c9cffc4677dd5f82909c3a39e6bb78",
         "--served-model-name",
-        "decision-27b",
+        "decision-large",
         "--gpu-memory-utilization",
         "0.55",
         "--kv-cache-memory",
@@ -76,7 +76,7 @@ containers:
       timeout: 5s
       start_period: 15m
 
-  - name: "decision-9b"
+  - name: "decision-medium"
     image: "ghcr.io/tinfoilsh/confidential-decision-models-vllm@sha256:0000000000000000000000000000000000000000000000000000000000000000"
     runtime: nvidia
     gpus: all
@@ -86,7 +86,7 @@ containers:
       [
         "/tinfoil/mpk/mpk-86e829b3945f3d5da9dfde2eb1496b4169a5d0b13fde5ca00a30059937a8e9bd",
         "--served-model-name",
-        "decision-9b",
+        "decision-medium",
         "--gpu-memory-utilization",
         "0.20",
         "--kv-cache-memory",
@@ -113,7 +113,7 @@ containers:
       timeout: 5s
       start_period: 10m
 
-  - name: "decision-4b"
+  - name: "decision-small"
     image: "ghcr.io/tinfoilsh/confidential-decision-models-vllm@sha256:0000000000000000000000000000000000000000000000000000000000000000"
     runtime: nvidia
     gpus: all
@@ -123,7 +123,7 @@ containers:
       [
         "/tinfoil/mpk/mpk-568e1da29fff2c8c81a28317939e402f9cbf79f72a8bb5cd0e91c96fd3fc2669",
         "--served-model-name",
-        "decision-4b",
+        "decision-small",
         "--gpu-memory-utilization",
         "0.10",
         "--kv-cache-memory",
