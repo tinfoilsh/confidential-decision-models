@@ -62,6 +62,11 @@ and that stack is broken under NVIDIA CC without two patches
 Retest both when vLLM v0.32.1 stable lands; the base image is pinned by
 digest in `vllm/Dockerfile`.
 
+**Text-only for now**: the models have vision towers and the vision path
+works (verified on the lab, 2026-10-20), but vLLM's `/v1/decisions` adapter
+currently rejects image inputs — enable images once upstream lifts that,
+after a vision-arm qualification pass.
+
 ## Scheduling
 
 `--max-num-seqs` 8 / 30 / 50 (27b / 9b / 4b) bounds in-flight latency to
