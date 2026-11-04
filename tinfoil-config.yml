@@ -152,6 +152,7 @@ containers:
 
 shim:
   upstream-port: 8080
+  drain_connections: true
   authenticated: true
   authenticated-endpoints:
     - /v1/decisions
